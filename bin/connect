@@ -1,27 +1,34 @@
 #!/bin/bash
 
 connect_main(){
-  local user
-  local root
-  local home
-  local timezone
+  local user=$1; shift
+  local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
+  local timezone=Asia/Tokyo
+  local image=getto/labo-slim:0.0.5
+  local home=/home/$user
+  local name=getto-labo
 
-  user=shun
-  root=$(cd $(dirname $(dirname $0)); echo $(pwd))
-  home=/home/$user
-  timezone=Asia/Tokyo
-  image=getto/labo-slim:0.0.5
-
-  docker run -it --rm \
-    --detach-keys ctrl-@,ctrl-@ \
-    -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps,$root/dotfiles:$home \
-    -e LABO_USER=$user \
-    -e LABO_TIMEZONE=$timezone \
-    -v $root/apps:/apps \
-    -v $root/dotfiles:$home \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -w $home \
-    $image
+  if [ "$(connect_container_exists)" ]; then
+    docker attach $name
+  else
+    if [ "$(connect_container_exists -a)" ]; then
+      docker rm $name
+    fi
+    docker run -it --rm \
+      --detach-keys ctrl-@,ctrl-@ \
+      --name $name \
+      -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps,$root/dotfiles:$home \
+      -e LABO_USER=$user \
+      -e LABO_TIMEZONE=$timezone \
+      -v $root/apps:/apps \
+      -v $root/dotfiles:$home \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -w $home \
+      $image
+  fi
+}
+connect_container_exists(){
+  docker ps "$@" -f name=$name --format '{{.ID}}'
 }
 
-connect_main
+connect_main "$@"
