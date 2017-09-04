@@ -2,14 +2,18 @@
 
 connect_main(){
   local user=$1; shift
+  : ${user:=labo}
+
   local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
   local timezone=Asia/Tokyo
-  local image=getto/labo-slim:0.0.5
+  local image=getto/labo-slim:0.0.6
   local home=/home/$user
   local name=getto-labo
 
   if [ "$(connect_container_exists)" ]; then
-    docker attach $name
+    docker attach $name \
+      --detach-keys ctrl-@,ctrl-@ \
+    ;
   else
     if [ "$(connect_container_exists -a)" ]; then
       docker rm $name
