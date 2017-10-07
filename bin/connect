@@ -6,7 +6,7 @@ connect_main(){
 
   local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
   local timezone=Asia/Tokyo
-  local image=getto/labo-slim:0.0.6
+  local image=getto/labo-slim:0.0.7-2017.09.20
   local home=/home/$user
   local name=getto-labo
 

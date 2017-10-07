@@ -1,0 +1,60 @@
+#!/bin/bash
+
+connect_main(){
+  local cmd=$1; shift
+
+  local user=$LABO_USER
+  local default_user=labo
+  local confirm
+  if [ -z "$user" ]; then
+    echo "labo user: $default_user"
+    read -p "OK? [Y/n]" confirm
+    case "$confirm" in
+      Y|y)
+        ;;
+      *)
+        echo "abort"
+        return
+        ;;
+    esac
+  fi
+  : ${user:=labo}
+
+  local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
+  local timezone=Asia/Tokyo
+  local image=getto/labo:1.3.3-pre2
+  local home=/home/$user
+  local name=getto-labo
+
+  if [ "$(connect_container_exists)" ]; then
+    if [ "$cmd" == restart ]; then
+      docker stop $name
+    else
+      echo "already running"
+      return
+    fi
+  fi
+
+  if [ "$(connect_container_exists -a)" ]; then
+    docker rm $name
+  fi
+
+  docker run -d \
+    --name $name \
+    -h $name \
+    -p 22:22 \
+    -e LABO_USER=$user \
+    -e LABO_TIMEZONE=$timezone \
+    -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps,$root/dotfiles:$home \
+    -v $root/apps:/apps \
+    -v $root/dotfiles:$home \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -w $home \
+    --restart=always \
+    $image
+}
+connect_container_exists(){
+  docker ps "$@" -f name=$name --format '{{.ID}}'
+}
+
+connect_main "$@"
