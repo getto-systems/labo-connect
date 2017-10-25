@@ -45,9 +45,9 @@ connect_main(){
     -p 22:22 \
     -e LABO_USER=$user \
     -e LABO_TIMEZONE=$timezone \
-    -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps:cached,$root/dotfiles:$home:cached \
-    -v $root/apps:/apps:cached \
-    -v $root/dotfiles:$home:cached \
+    -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps:delegated,$root/dotfiles:$home:delegated \
+    -v $root/apps:/apps:delegated \
+    -v $root/dotfiles:$home:delegated \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -w $home \
     --restart=always \
