@@ -1,0 +1,13 @@
+version: "2"
+
+options:
+  verbose: true
+syncs:
+  apps:
+    sync_userid: '1000'
+    src: './apps'
+    sync_excludes: []
+  home:
+    sync_userid: '1000'
+    src: './dotfiles'
+    sync_excludes: []
