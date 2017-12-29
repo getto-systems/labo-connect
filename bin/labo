@@ -1,24 +1,13 @@
 #!/bin/bash
 
 connect_main(){
-  local cmd=$1; shift
-
-  local user=$LABO_USER
-  local default_user=labo
-  local confirm
+  local user=$1; shift
   if [ -z "$user" ]; then
-    echo "labo user: $default_user"
-    read -p "OK? [Y/n]" confirm
-    case "$confirm" in
-      Y|y)
-        ;;
-      *)
-        echo "abort"
-        return
-        ;;
-    esac
+    echo "usage: labo <USER_NAME>"
+    exit 1
   fi
-  : ${user:=labo}
+
+  local confirm
 
   local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
   local timezone=Asia/Tokyo
@@ -27,12 +16,15 @@ connect_main(){
   local name=getto-labo
 
   if [ "$(connect_container_exists)" ]; then
-    if [ "$cmd" == restart ]; then
-      docker stop $name
-    else
-      echo "already running"
-      return
-    fi
+    echo "container already running"
+    read -p "restart? [y/N] " confirm
+    case "$confirm" in
+      Y|y)
+        docker stop $name
+        ;;
+      *)
+        ;;
+    esac
   fi
 
   if [ "$(connect_container_exists -a)" ]; then
@@ -45,9 +37,9 @@ connect_main(){
     -p 22:22 \
     -e LABO_USER=$user \
     -e LABO_TIMEZONE=$timezone \
-    -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps:delegated,$root/dotfiles:$home:delegated \
-    -v $root/apps:/apps:delegated \
-    -v $root/dotfiles:$home:delegated \
+    -e DOCKER_WRAPPER_VOLUMES=apps:/apps,home:$home \
+    -v apps:/apps \
+    -v home:$home \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -w $home \
     --restart=always \
