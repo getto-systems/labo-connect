@@ -1,6 +1,6 @@
 # labo-connect
 
-start labo server script for getto/labo
+start script for labo-server([getto/labo](https://github.com/getto-systems/labo))
 
 ```bash
 labo <USER_NAME>
