@@ -9,5 +9,5 @@ syncs:
     sync_excludes: []
   home:
     sync_userid: '1000'
-    src: './dotfiles'
+    src: './home'
     sync_excludes: []
