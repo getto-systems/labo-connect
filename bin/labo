@@ -12,7 +12,6 @@ connect_main(){
   local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
   local timezone=Asia/Tokyo
   local image=getto/labo:1.3.3-2017.10.07
-  local home=/home/$user
   local name=getto-labo
 
   if [ "$(connect_container_exists)" ]; then
@@ -37,11 +36,11 @@ connect_main(){
     -p 22:22 \
     -e LABO_USER=$user \
     -e LABO_TIMEZONE=$timezone \
-    -e DOCKER_WRAPPER_VOLUMES=apps:/apps,home:$home \
+    -e DOCKER_WRAPPER_VOLUMES=apps:/apps,home:/home \
     -v apps:/apps \
-    -v home:$home \
+    -v home:/home \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -w $home \
+    -w /home/$user \
     --restart=always \
     $image
 
