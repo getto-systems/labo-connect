@@ -9,5 +9,5 @@ syncs:
     sync_excludes: []
   home:
     sync_userid: '1000'
-    src: './dotfiles'
-    sync_excludes: []
+    src: './home'
+    sync_excludes: [".local/share/nvim/swap"]
