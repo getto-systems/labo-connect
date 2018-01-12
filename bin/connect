@@ -2,9 +2,11 @@
 
 connect_main(){
   local user=$1; shift
-  : ${user:=labo}
+  if [ -z "$user" ]; then
+    echo "usage: connect <USER_NAME>"
+    exit 1
+  fi
 
-  local root=$(cd $(dirname $(dirname $0)); echo $(pwd))
   local timezone=Asia/Tokyo
   local image=getto/labo-slim:0.0.7-2017.09.20
   local home=/home/$user
@@ -21,11 +23,11 @@ connect_main(){
     docker run -it --rm \
       --detach-keys ctrl-@,ctrl-@ \
       --name $name \
-      -e DOCKER_WRAPPER_VOLUMES=$root/apps:/apps,$root/dotfiles:$home \
+      -e DOCKER_WRAPPER_VOLUMES=apps:/apps,home:/home \
       -e LABO_USER=$user \
       -e LABO_TIMEZONE=$timezone \
-      -v $root/apps:/apps \
-      -v $root/dotfiles:$home \
+      -v apps:/apps \
+      -v home:/home \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -w $home \
       $image

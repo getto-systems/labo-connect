@@ -10,4 +10,4 @@ syncs:
   home:
     sync_userid: '1000'
     src: './home'
-    sync_excludes: []
+    sync_excludes: [".local/share/nvim/swap"]
