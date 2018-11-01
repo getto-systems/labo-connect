@@ -8,7 +8,7 @@ connect_main(){
   fi
 
   local timezone=Asia/Tokyo
-  local image=getto/labo-slim:0.0.7-2017.09.20
+  local image=getto/base:k2JmDVzT
   local home=/home/$user
   local name=getto-labo
 
@@ -20,6 +20,7 @@ connect_main(){
     if [ "$(connect_container_exists -a)" ]; then
       docker rm $name
     fi
+    docker pull $image
     docker run -it --rm \
       --detach-keys ctrl-@,ctrl-@ \
       --name $name \
