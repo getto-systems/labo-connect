@@ -3,8 +3,13 @@
 logs_main(){
   local name
 
-  docker ps --format="{{.Names}}"
-  read -p "container: " name
+  name=$1; shift
+
+  if [ -z "$name" ]; then
+    docker ps --format="{{.Names}}"
+    read -p "container: " name
+  fi
+
   docker logs -f $name
 }
 
