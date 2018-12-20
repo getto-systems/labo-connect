@@ -1,0 +1,11 @@
+#!/bin/bash
+
+logs_main(){
+  local name
+
+  docker ps --format="{{.Names}}"
+  read -p "container: " name
+  docker logs -f $name
+}
+
+logs_main "$@"
