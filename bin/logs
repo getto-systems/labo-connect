@@ -2,12 +2,13 @@
 
 logs_main(){
   local name
-
   name=$1; shift
 
   if [ -z "$name" ]; then
+    echo "usage: logs <container>"
+    echo "containers:"
     docker ps --format="{{.Names}}"
-    read -p "container: " name
+    exit
   fi
 
   docker logs -f $name
