@@ -13,9 +13,13 @@ connect_main(){
   local name=getto-labo
   local base
 
-  for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none) do
-    docker pull $image
+  for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none); do
+    docker pull $base
   done
+
+  if [ -n "$(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep none)" ]; then
+    docker image rm $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep getto/base | grep none | awk '{ print $2 }')
+  fi
 
   if [ "$(connect_container_exists)" ]; then
     docker attach $name \
