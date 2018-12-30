@@ -7,18 +7,27 @@ connect_main(){
     exit 1
   fi
 
+  local skip_update
+
+  if [ "$user" = "--skip-update" ]; then
+    skip_update=true
+    user=$1; shift
+  fi
+
   local timezone=Asia/Tokyo
   local image=getto/base:k2JmDVzT
   local home=/home/$user
   local name=getto-labo
   local base
 
-  for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none); do
-    docker pull $base
-  done
+  if [ -z "$skip_update" ]; then
+    for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none); do
+      docker pull $base
+    done
 
-  if [ -n "$(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep none)" ]; then
-    docker image rm $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep getto/base | grep none | awk '{ print $2 }')
+    if [ -n "$(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep none)" ]; then
+      docker image rm $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep getto/base | grep none | awk '{ print $2 }')
+    fi
   fi
 
   if [ "$(connect_container_exists)" ]; then
