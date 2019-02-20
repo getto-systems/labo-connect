@@ -1,17 +1,28 @@
 #!/bin/bash
 
 connect_main(){
+  local interface_name=$1; shift
+  if [ -z "$interface_name" ]; then
+    echo "usage: connect <INTERFACE_NAME> <USER_NAME>"
+    exit 1
+  fi
+
+  local ip=$(ip addr show $interface_name | grep "inet " | awk '{ print $2 }' | sed 's|/.*||')
+  if [ -z "$ip" ]; then
+    echo "[FAILED] detect local ip address"
+    exit 1
+  fi
+
   local user=$1; shift
   if [ -z "$user" ]; then
-    echo "usage: connect <USER_NAME>"
+    echo "usage: connect <INTERFACE_NAME> <USER_NAME>"
     exit 1
   fi
 
   local skip_update
 
-  if [ "$user" = "--skip-update" ]; then
+  if [ -n "$SKIP_UPDATE" ]; then
     skip_update=true
-    user=$1; shift
   fi
 
   local timezone=Asia/Tokyo
@@ -42,6 +53,7 @@ connect_main(){
       --detach-keys ctrl-@,ctrl-@ \
       --name $name \
       -e DOCKER_WRAPPER_VOLUMES=$HOME/volumes/apps:/apps,$HOME/volumes/home:/home \
+      -e LABO_IP=$ip \
       -e LABO_USER=$user \
       -e LABO_TIMEZONE=$timezone \
       -v $HOME/volumes/apps:/apps \
@@ -52,7 +64,7 @@ connect_main(){
   fi
 }
 connect_container_exists(){
-  docker ps "$@" -f name=$name --format '{{.ID}}'
+  docker ps "$@" -f name=$name --format '{{.ID}} {{.Names}}' | grep $name'$'
 }
 
 connect_main "$@"
