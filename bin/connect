@@ -1,28 +1,33 @@
 #!/bin/bash
 
 connect_main(){
-  local interface_name=$1; shift
-  if [ -z "$interface_name" ]; then
-    echo "usage: connect <INTERFACE_NAME> <USER_NAME>"
+  if [ -z "$INTERFACE_NAME" ]; then
+    echo "[FAILED] cannot detect interface name : set INTERFACE_NAME"
     exit 1
   fi
 
-  local ip=$(ip addr show $interface_name | grep "inet " | awk '{ print $2 }' | sed 's|/.*||')
+  local ip=$(ip addr show $INTERFACE_NAME | grep "inet " | awk '{ print $2 }' | sed 's|/.*||')
   if [ -z "$ip" ]; then
-    echo "[FAILED] detect local ip address"
+    echo "[FAILED] cannot detect local ip address"
     exit 1
   fi
 
-  local user=$1; shift
+  local user
+  if [ -n "$LABO_USER" ]; then
+    user=$LABO_USER
+  else
+    if [ -n "$USER" ]; then
+      user=$USER
+    fi
+  fi
   if [ -z "$user" ]; then
-    echo "usage: connect <INTERFACE_NAME> <USER_NAME>"
+    echo "[FAILED] cannot detect user name : set USER or LABO_USER"
     exit 1
   fi
 
-  local skip_update
-
-  if [ -n "$SKIP_UPDATE" ]; then
-    skip_update=true
+  local without_update
+  if [ "$1" == "--without-update" ]; then
+    without_update=true
   fi
 
   local timezone=Asia/Tokyo
@@ -31,7 +36,7 @@ connect_main(){
   local name=getto-labo
   local base
 
-  if [ -z "$skip_update" ]; then
+  if [ -z "$without_update" ]; then
     for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none); do
       docker pull $base
     done
