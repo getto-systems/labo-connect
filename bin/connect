@@ -57,12 +57,12 @@ connect_main(){
     docker run -it --rm \
       --detach-keys ctrl-@,ctrl-@ \
       --name $name \
-      -e DOCKER_WRAPPER_VOLUMES=$HOME/volumes/apps:/apps,$HOME/volumes/home:/home \
+      -e DOCKER_WRAPPER_VOLUMES=/volumes/apps:/apps,/volumes/home:/home \
       -e LABO_IP=$ip \
       -e LABO_USER=$user \
       -e LABO_TIMEZONE=$timezone \
-      -v $HOME/volumes/apps:/apps \
-      -v $HOME/volumes/home:/home \
+      -v /volumes/apps:/apps \
+      -v /volumes/home:/home \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -w $home \
       $image
