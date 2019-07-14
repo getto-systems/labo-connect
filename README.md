@@ -1,26 +1,38 @@
-# labo-connect
+# labo-container-connect
 
-start script for labo-server([getto/labo](https://github.com/getto-systems/labo))
+connect script for labo-container
 
 ```bash
-labo <USER_NAME>
+INTERFACE_NAME=eno1 ~/labo-connect/bin/connect
 ```
 
 ###### Table of Contents
 
-- [Requirements](#requirements)
-- [Usage](#usage)
-- [License](#license)
+- [Requirements](#Requirements)
+- [Usage](#Usage)
+- [License](#License)
 
 
-<a id="requirements"></a>
 ## Requirements
 
-- Docker version 17.09.0-ce
+- Docker version 18.09.7, build 2d0083d657
 
 
-<a id="usage"></a>
 ## Usage
+
+```bash
+INTERFACE_NAME=eno1 ~/labo-connect/bin/connect
+```
+
+- INTERFACE_NAME : network interface for detect ip address
+
+### connect without image update
+
+```bash
+INTERFACE_NAME=eno1 ~/labo-connect/bin/connect --without-update
+```
+
+### Install
 
 to install labo-connect, clone this repository into your scripts directory
 
@@ -28,41 +40,9 @@ to install labo-connect, clone this repository into your scripts directory
 git clone https://github.com/getto-systems/labo-connect.git /path/to/scripts/labo-connect
 ```
 
-### Setup Volumes
 
-labo script mount volumes
-
-- apps : mount to /apps
-- home : mount to /home/USER_NAME
-
-setup apps and home with [docker-sync](https://github.com/EugenMayer/docker-sync)
-
-```bash
-docker-sync start
-```
-
-example of docker-sync.yml:
-
-```yaml
-version: "2"
-
-options:
-  verbose: true
-syncs:
-  apps:
-    sync_userid: '1000'
-    src: './apps'
-    sync_excludes: []
-  home:
-    sync_userid: '1000'
-    src: './dotfiles'
-    sync_excludes: []
-```
-
-
-<a id="license"></a>
 ## License
 
-labo-connect is licensed under the [MIT](LICENSE) license.
+labo-container-connect is licensed under the [MIT](LICENSE) license.
 
 Copyright &copy; since 2017 shun@getto.systems
