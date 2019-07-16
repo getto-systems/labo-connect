@@ -1,3 +1,7 @@
+# Version : 1.1.0
+
+add: envrc
+
 # Version : 1.0.0
 
 remove unused, update README
