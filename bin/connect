@@ -1,18 +1,68 @@
 #!/bin/bash
 
 connect_main(){
+  local without_update
+  connect_detect_options "$@"
+
+  local ip; connect_detect_ip
+  local user; connect_detect_user
+
+  local name=getto-labo
+  local image=getto/labo-container:latest
+  local timezone=Asia/Tokyo
+  local work_dir=/home/$user
+  local detach_keys=ctrl-@,ctrl-@
+  local tmp_dir=/tmp/labo-connect/$user
+  local apps_volume=/docker-volumes/apps:/apps
+  local home_volume=/docker-volumes/home:/home
+  local tmp_volume=$tmp_dir:/tmp
+
+  connect_update_images
+
+  if [ "$(connect_container_exists)" ]; then
+    docker attach $name \
+      --detach-keys $detach_keys \
+    ;
+  else
+    if [ "$(connect_container_exists -a)" ]; then
+      docker rm $name
+    fi
+
+    mkdir -p $tmp_dir
+
+    docker run -it --rm \
+      --name $name \
+      --detach-keys $detach_keys \
+      -e DOCKER_WRAPPER_VOLUMES=$apps_volume,$home_volume,$tmp_volume \
+      -e LABO_IP=$ip \
+      -e LABO_USER=$user \
+      -e LABO_TIMEZONE=$timezone \
+      -v $apps_volume \
+      -v $home_volume \
+      -v $tmp_volume \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -w $work_dir \
+      $image
+  fi
+}
+connect_detect_options(){
+  if [ "$1" == "--without-update" ]; then
+    without_update=true
+  fi
+}
+connect_detect_ip(){
   if [ -z "$INTERFACE_NAME" ]; then
     echo "[FAILED] cannot detect interface name : set INTERFACE_NAME"
     exit 1
   fi
 
-  local ip=$(ip addr show $INTERFACE_NAME | grep "inet " | awk '{ print $2 }' | sed 's|/.*||')
+  ip=$(ip addr show $INTERFACE_NAME | grep "inet " | awk '{ print $2 }' | sed 's|/.*||')
   if [ -z "$ip" ]; then
     echo "[FAILED] cannot detect local ip address"
     exit 1
   fi
-
-  local user
+}
+connect_detect_user(){
   if [ -n "$LABO_USER" ]; then
     user=$LABO_USER
   else
@@ -24,48 +74,32 @@ connect_main(){
     echo "[FAILED] cannot detect user name : set USER or LABO_USER"
     exit 1
   fi
-
-  local without_update
-  if [ "$1" == "--without-update" ]; then
-    without_update=true
-  fi
-
-  local timezone=Asia/Tokyo
-  local image=getto/base:k2JmDVzT
-  local home=/home/$user
-  local name=getto-labo
-  local base
+}
+connect_update_images(){
+  local target
 
   if [ -z "$without_update" ]; then
-    for base in $(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep -v none); do
-      docker pull $base
-    done
+    connect_update_target $image
 
-    if [ -n "$(docker image ls --format="{{.Repository}}:{{.Tag}}" | grep getto/base | grep none)" ]; then
-      docker image rm $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep getto/base | grep none | awk '{ print $2 }')
+    if [ -f ~/.config/getto/labo-container-connect/update-images ]; then
+      for target in $(cat ~/.labo-connect-update-images); do
+        connect_update_target $target
+      done
     fi
   fi
+}
+connect_update_target(){
+  local update_image
+  local old_image
 
-  if [ "$(connect_container_exists)" ]; then
-    docker attach $name \
-      --detach-keys ctrl-@,ctrl-@ \
-    ;
-  else
-    if [ "$(connect_container_exists -a)" ]; then
-      docker rm $name
-    fi
-    docker run -it --rm \
-      --detach-keys ctrl-@,ctrl-@ \
-      --name $name \
-      -e DOCKER_WRAPPER_VOLUMES=/volumes/apps:/apps,/volumes/home:/home \
-      -e LABO_IP=$ip \
-      -e LABO_USER=$user \
-      -e LABO_TIMEZONE=$timezone \
-      -v /volumes/apps:/apps \
-      -v /volumes/home:/home \
-      -v /var/run/docker.sock:/var/run/docker.sock \
-      -w $home \
-      $image
+  update_image=$1
+
+  if [ -n "$update_image" ]; then
+    docker pull $update_image
+
+    for old_image in $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep ${update_image%%:*} | grep none | awk '{ print $2 }'); do
+      docker image rm $old_image
+    done
   fi
 }
 connect_container_exists(){
