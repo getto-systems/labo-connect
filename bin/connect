@@ -12,8 +12,10 @@ connect_main(){
   local timezone=Asia/Tokyo
   local work_dir=/home/$user
   local detach_keys=ctrl-@,ctrl-@
+  local tmp_dir=/tmp/labo-connect/$user
   local apps_volume=/docker-volumes/apps:/apps
   local home_volume=/docker-volumes/home:/home
+  local tmp_volume=$tmp_dir:/tmp
 
   connect_update_images
 
@@ -26,15 +28,18 @@ connect_main(){
       docker rm $name
     fi
 
+    mkdir -p $tmp_dir
+
     docker run -it --rm \
       --name $name \
       --detach-keys $detach_keys \
-      -e DOCKER_WRAPPER_VOLUMES=$apps_volume,$home_volume \
+      -e DOCKER_WRAPPER_VOLUMES=$apps_volume,$home_volume,$tmp_volume \
       -e LABO_IP=$ip \
       -e LABO_USER=$user \
       -e LABO_TIMEZONE=$timezone \
       -v $apps_volume \
       -v $home_volume \
+      -v $tmp_volume \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -w $work_dir \
       $image
@@ -85,15 +90,15 @@ connect_update_images(){
 }
 connect_update_target(){
   local update_image
-  local base
+  local old_image
 
   update_image=$1
 
   if [ -n "$update_image" ]; then
-    echo docker pull $update_image
+    docker pull $update_image
 
-    for base in $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep ${update_image%%:*} | grep none | awk '{ print $2 }'); do
-      echo docker image rm $base
+    for old_image in $(docker image ls --format="{{.Repository}}:{{.Tag}} {{.ID}}" | grep ${update_image%%:*} | grep none | awk '{ print $2 }'); do
+      docker image rm $old_image
     done
   fi
 }
