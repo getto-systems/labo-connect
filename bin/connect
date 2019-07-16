@@ -2,6 +2,9 @@
 
 connect_main(){
   local without_update
+  local update_config
+  update_config=~/.config/getto/labo-container-connect/update-images
+
   connect_detect_options "$@"
 
   local ip; connect_detect_ip
@@ -81,8 +84,8 @@ connect_update_images(){
   if [ -z "$without_update" ]; then
     connect_update_target $image
 
-    if [ -f ~/.config/getto/labo-container-connect/update-images ]; then
-      for target in $(cat ~/.labo-connect-update-images); do
+    if [ -f $update_config ]; then
+      for target in $(cat $update_config); do
         connect_update_target $target
       done
     fi
