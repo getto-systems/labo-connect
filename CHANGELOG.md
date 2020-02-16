@@ -1,3 +1,9 @@
+# CHANGELOG
+
+## Version : 1.4.0
+
+- fix: gitlab-ci : See merge request getto-systems-base/labo/container/connect!12
+
 # Version : 1.3.0
 
 fix: update_config file
