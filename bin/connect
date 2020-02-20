@@ -13,12 +13,14 @@ connect_main(){
   local name=getto-labo
   local image=getto/labo-container:latest
   local timezone=Asia/Tokyo
+  local lang=en_US.utf8
   local work_dir=/home/$user
   local detach_keys=ctrl-@,ctrl-@
   local tmp_dir=/tmp/labo-connect/$user
   local apps_volume=/docker-volumes/apps:/apps
   local home_volume=/docker-volumes/home:/home
   local tmp_volume=$tmp_dir:/tmp
+  local docker_gid=$(cat /etc/group | grep docker | cut -d : -f3)
 
   connect_update_images
 
@@ -40,6 +42,8 @@ connect_main(){
       -e LABO_IP=$ip \
       -e LABO_USER=$user \
       -e LABO_TIMEZONE=$timezone \
+      -e DOCKER_GID=$docker_gid \
+      -e LANG=$lang \
       -v $apps_volume \
       -v $home_volume \
       -v $tmp_volume \
