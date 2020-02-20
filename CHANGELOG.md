@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version : 1.5.0
+
+- fix: connect : See merge request getto-systems-base/labo/container/connect!14
+
+
 ## Version : 1.4.0
 
 - fix: gitlab-ci : See merge request getto-systems-base/labo/container/connect!12
